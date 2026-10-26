@@ -2,6 +2,8 @@
 
 Site-wide full-text search with its index crawler — the **Search** module of [AstrX](https://github.com/Vxmdzhb/astrx).
 
+![Site search across boards, comments and news](docs/screenshot.png)
+
 - Module key: `search` (switch it on in the site's `resources/config/Modules.config.php`)
 - Pages: `admin_search`, `site_search`
 - Requires: `astrx/cms`, `astrx/framework`, `astrx/library`
