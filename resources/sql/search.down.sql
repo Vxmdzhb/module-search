@@ -7,11 +7,9 @@ DELETE FROM `page` WHERE `module` = 'search';
 DROP TABLE IF EXISTS `search_index`;
 DROP TABLE IF EXISTS `search_index_job`;
 
--- A nav entry whose page went away is dangling: delete its id-allocator row,
+-- A nav entry whose page is gone is dangling: delete its id-allocator row,
 -- which cascades to the entry (navbar_entry.id references navbar_entry_ids).
--- Deleting only the entry, as this used to, left the allocator row behind for
--- good. Allocator rows with no entry at all are swept too (a normal install
--- has none; older purges left them).
+-- Allocator rows with no entry at all are removed too.
 DELETE nid FROM `navbar_entry_ids` nid
   JOIN `navbar_entry` ne ON ne.id = nid.id
   LEFT JOIN `navbar_internal` ni ON ni.id = ne.id

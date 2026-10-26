@@ -61,15 +61,12 @@ final class SearchIndexer
     /**
      * Rebuild the index from every source, on demand.
      *
-     * Hardened against the two failure modes that made an earlier version appear
-     * to "never stop": (1) it no longer wraps the WHOLE crawl in one giant
-     * transaction — each batch commits on its own, so a large site can't exhaust
-     * the undo log / lock-wait budget or OOM mid-run and leave the job wedged in
-     * 'running'; (2) crawlType() stops the instant its keyset cursor fails to
-     * advance, and a per-source batch cap plus a global doc ceiling hard-bound
-     * total work. Rather than DELETE-then-reinsert, it UPSERTs every live row
-     * (stamping indexed_at) then sweeps rows not refreshed this run — so
-     * deleted/hidden content drops out without a big destructive transaction.
+     * Each batch commits on its own (no single huge transaction), crawlType()
+     * stops as soon as its keyset cursor stops advancing, and a per-source batch
+     * cap plus a global document ceiling bound the total work, so the job can't
+     * get stuck in 'running'. Live rows are upserted with a fresh indexed_at, then
+     * rows not refreshed in this run are swept, so deleted or hidden content
+     * drops out without a big destructive transaction.
      *
      * @param (callable(string): void)|null $progress optional per-step line sink (CLI)
      * @return Result<int> the number of indexed documents
@@ -162,7 +159,7 @@ final class SearchIndexer
      *
      * The returned `complete` flag says whether the source was crawled to its
      * natural end (empty/short batch) rather than cut short by a cap or the
-     * cursor guard. rebuild() only sweeps types that completed (R4-22), so a
+     * cursor guard. rebuild() only sweeps types that completed, so a
      * truncated source never has its unseen-but-live rows deleted.
      *
      * @param \PDOStatement $upsert prepared once by rebuild(), re-executed here

@@ -98,7 +98,7 @@ final class SearchSources
     public function crawlPages(int $afterId, int $limit): array
     {
         $stmt = $this->pdo->prepare(
-            // R11 (MED): honor the noindex contract every OTHER layer enforces
+            // Honor the noindex contract every OTHER layer enforces
             // (page_robots.index=0, the controller's X-Robots-Tag, robots.txt).
             // Without the page_robots join the crawler indexed the bot-trap
             // honeypot (seeded template=1, hidden=0, robots index=0) and the
@@ -350,7 +350,7 @@ final class SearchSources
     public function livePages(string $like, int $limit): array
     {
         $stmt = $this->pdo->prepare(
-            // R11 (MED): mirror crawlPages — exclude noindex pages (bot-trap +
+            // Mirror crawlPages — exclude noindex pages (bot-trap +
             // auth-gated) from the live fallback too, so they never surface.
             "SELECT p.id, p.url_id, p.i18n, pm.title, pm.description
                FROM page p

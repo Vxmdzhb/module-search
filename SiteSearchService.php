@@ -102,7 +102,7 @@ final class SiteSearchService
             // Layer 2: live fallback. When the index is unavailable or empty we
             // run a FULL live search (cutoff 0, pages included); otherwise only
             // rows created at/after the crawl start (oldest indexed_at) are
-            // fetched, so content created mid-crawl is not hidden (R4-24).
+            // fetched, so content created mid-crawl is not hidden.
             $cutoff     = $indexAvailable ? $this->indexCutoff() : 0;
             $indexEmpty = $cutoff === 0;
             $liveHits   = $this->fromLive($like, $type, $limit, $cutoff, includePages: $indexEmpty);
@@ -197,7 +197,7 @@ final class SiteSearchService
     /**
      * Crawl-start cutoff as a unix timestamp, or 0 when the index is empty.
      *
-     * R4-24: this is the OLDEST indexed_at, not the newest. A crawl stamps each
+     * This is the OLDEST indexed_at, not the newest. A crawl stamps each
      * row's indexed_at as it upserts, so MAX(indexed_at) is the crawl END —
      * using it hides content created mid-crawl (after its source was already
      * crawled) until the next full crawl, because such rows are neither indexed

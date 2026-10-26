@@ -82,11 +82,9 @@ final class SiteSearchController extends AbstractController
         $this->ctx->set('form_action',  $this->urlGen->toPage($this->t->t('WORDING_SEARCH')));
         $this->ctx->set('query',        $q);
         $this->ctx->set('searched',     $searched);
-        // NB: key is 'search_results', NOT 'results' — DefaultTemplateContext
-        // reserves 'results' as a legacy alias for the diagnostic message list
-        // and overwrites it in finalise(), which runs after this controller. A
-        // 'results' key here would be silently clobbered to the (empty) message
-        // list, so the rows would vanish while the count still showed.
+        // The key is 'search_results', not 'results': DefaultTemplateContext uses
+        // 'results' for the diagnostic message list and overwrites it after this
+        // controller runs.
         $this->ctx->set('search_results', $results);
         $this->ctx->set('has_results',  $results !== []);
         $this->ctx->set('result_count', $this->t->t('search.result_count', ['count' => count($results)]));
