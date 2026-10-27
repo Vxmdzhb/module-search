@@ -2,11 +2,30 @@
 
 Site-wide full-text search with its index crawler — the **Search** module of [AstrX](https://github.com/Vxmdzhb/astrx).
 
-![Site search across boards, comments and news](docs/screenshot.png)
+![The Search page: this site's results, and a tab per engine](docs/screenshot.png)
 
 - Module key: `search` (switch it on in the site's `resources/config/Modules.config.php`)
 - Pages: `admin_search`, `site_search`
 - Requires: `astrx/cms`, `astrx/framework`, `astrx/library`
+
+The Search page is the site's one search box. Its first tab, **This site**,
+searches news, pages, comments and board posts through a MariaDB FULLTEXT
+index (`php tools/search_index.php` rebuilds it; Admin → Search index queues a
+rebuild). Other modules add tabs: the engine modules
+([module-websearch](https://github.com/Vxmdzhb/module-websearch),
+[module-onionsearch](https://github.com/Vxmdzhb/module-onionsearch),
+[module-torrentsearch](https://github.com/Vxmdzhb/module-torrentsearch))
+each add one. A tab is any class implementing `AstrX\Search\Tab\SearchTab`,
+listed under `extensions` in its module's manifest:
+
+```php
+'extensions' => [\AstrX\Search\Tab\SearchTab::class => [MyTab::class]],
+```
+
+`search()` returns a `SearchTabPage` of `SearchHit`s (a title, a link, a
+snippet, facts, links, files), which the page draws the same way for every
+tab; `order()` places the tab. A tab whose engine is down says so, and the
+other tabs keep working. Switch a module off and its tab goes with it.
 
 It ships its own templates, catalogs (en, it), default configuration and SQL in
 `resources/`; the site overrides any of them from its own `resources/`.

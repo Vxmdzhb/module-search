@@ -27,4 +27,13 @@ return [
     'search.type.pages'    => 'Page',
     'search.type.comments' => 'Comment',
     'search.type.board'    => 'Board post',
+
+    // Tabs and engine results.
+    'search.tab.site'            => 'This site',
+    'search.result_count_about'  => 'About {count} result(s)',
+    'search.unavailable'         => 'This search engine is not answering right now. Please try again later.',
+    'search.prev'                => 'Previous',
+    'search.next'                => 'Next',
+    'search.more_options'        => 'More options',
+    'search.more_files'          => 'more files',
 ];

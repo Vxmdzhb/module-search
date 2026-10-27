@@ -27,4 +27,13 @@ return [
     'search.type.pages'    => 'Pagina',
     'search.type.comments' => 'Commento',
     'search.type.board'    => 'Post',
+
+    // Schede e risultati dei motori.
+    'search.tab.site'            => 'Questo sito',
+    'search.result_count_about'  => 'Circa {count} risultati',
+    'search.unavailable'         => 'Questo motore di ricerca non risponde al momento. Riprova più tardi.',
+    'search.prev'                => 'Precedente',
+    'search.next'                => 'Successiva',
+    'search.more_options'        => 'Altre opzioni',
+    'search.more_files'          => 'altri file',
 ];

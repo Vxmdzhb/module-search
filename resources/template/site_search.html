@@ -1,8 +1,10 @@
 <div id="site_search">
     <style>
-    /* Self-contained, mirroring board_search.html: transparent fills,
-       currentColor borders, px spacing, no rem/em, no border-radius. */
-    #site_search{--ss-border:currentColor;background:transparent;color:inherit;}
+    /* Self-contained: transparent fills, currentColor borders, px spacing, no
+       rem/em, no border-radius. Two accents, the same as the web search page,
+       colour the RESULTS only (titles blue, addresses and facts green), so the
+       page still reads as part of the site in every theme. */
+    #site_search{--ss-border:currentColor;--ss-accent:#5b9bff;--ss-url:#54b054;--ss-file:#c9a227;background:transparent;color:inherit;}
     #site_search a{text-decoration:none;color:inherit;}
     #site_search a:hover{text-decoration:underline;}
     .search-header{border-bottom:1px solid var(--ss-border);margin-bottom:8px;padding-bottom:5px;}
@@ -10,37 +12,73 @@
     .search-form{border:1px solid var(--ss-border);background:transparent;padding:8px;margin:8px 0;}
     .search-form p{margin:4px 0;}
     .search-form input[type=text],.search-form select{background:transparent;color:inherit;border:1px solid var(--ss-border);padding:2px 4px;}
-    .search-form input[type=text]{min-width:16em;}
+    .search-form input[type=text]{min-width:20em;}
     .search-form button{background:transparent;color:inherit;border:1px solid var(--ss-border);padding:2px 12px;cursor:pointer;}
     .search-form button:hover{text-decoration:underline;}
+    .search-tabs{display:flex;flex-wrap:wrap;gap:0;margin:8px 0;border-bottom:1px solid var(--ss-border);}
+    .search-tabs a{border:1px solid var(--ss-border);border-bottom:none;padding:3px 14px;margin-right:4px;}
+    #site_search .search-tabs a.active{border-color:var(--ss-accent);color:var(--ss-accent);font-weight:bold;}
     .search-count{font-style:italic;margin:8px 0;}
-    .search-empty{font-style:italic;}
-    .search-result{padding:6px 0;border-bottom:1px dashed var(--ss-border);}
-    .search-result .pill{border:1px solid var(--ss-border);padding:0 6px;margin-right:6px;font-size:12px;text-transform:uppercase;}
-    .search-result .search-excerpt{display:block;margin:2px 0 0;white-space:pre-wrap;word-wrap:break-word;}
+    .search-empty,.search-unavailable{font-style:italic;margin:8px 0;}
+    .search-result{padding:7px 0;border-bottom:1px dashed var(--ss-border);}
+    .search-result .search-url{display:block;font-size:12px;color:var(--ss-url);word-wrap:break-word;}
+    #site_search .search-result .search-title a{color:var(--ss-accent);font-size:1.1em;}
+    .search-result .pill{border:1px solid var(--ss-url);color:var(--ss-url);padding:0 6px;margin-right:6px;font-size:11px;text-transform:uppercase;}
+    .search-result .search-snippet{display:block;margin:2px 0 0;white-space:pre-wrap;word-wrap:break-word;}
+    .search-result .search-files{margin:3px 0 2px 2px;padding:0;list-style:none;font-size:13px;}
+    .search-result .search-files li{margin:1px 0;word-wrap:break-word;}
+    .search-result .search-files li:before{content:"\25B8 ";color:var(--ss-file);}
+    .search-result .file-size{color:var(--ss-url);font-size:12px;margin-left:6px;}
+    .search-result .file-more{font-style:italic;font-size:12px;}
+    .search-result .search-meta{display:block;font-size:12px;color:var(--ss-url);margin-top:2px;}
+    .search-result .search-links{font-size:12px;margin-top:3px;}
+    #site_search .search-result .search-links a{border:1px solid var(--ss-accent);color:var(--ss-accent);padding:0 8px;margin-right:6px;}
+    .search-footer{margin:10px 0;display:flex;gap:14px;flex-wrap:wrap;}
+    #site_search .search-footer a{border:1px solid var(--ss-accent);color:var(--ss-accent);padding:2px 10px;}
     </style>
 
     <div class="search-header"><h1>{{lbl_heading}}</h1></div>
 
     <form class="search-form" method="get" action="{{form_action}}">
         {{&sid_input}}
-        <p><label>{{lbl_query}} <input type="text" name="q" value="{{query}}" autocomplete="off"></label></p>
+        <input type="hidden" name="source" value="{{active_source}}">
+        <p><label>{{lbl_query}} <input type="text" name="q" value="{{query}}" autocomplete="off"></label>
+           <button type="submit">{{lbl_submit}}</button></p>
+        {{#is_site_tab}}
         <p><label>{{lbl_type}}
             <select name="type">
                 {{#types}}<option value="{{value}}"{{#sel}} selected{{/sel}}>{{label}}</option>{{/types}}
             </select>
         </label></p>
-        <p><button type="submit">{{lbl_submit}}</button></p>
+        {{/is_site_tab}}
     </form>
 
+    {{#has_tabs}}
+    <nav class="search-tabs">
+        {{#search_tabs}}<a href="{{url}}" rel="nofollow"{{#active}} class="active"{{/active}}>{{label}}</a>{{/search_tabs}}
+    </nav>
+    {{/has_tabs}}
+
     {{#searched}}
-        {{#has_results}}<p class="search-count">{{result_count}}</p>{{/has_results}}
-        {{^has_results}}<p class="search-empty">{{lbl_no_results}}</p>{{/has_results}}
-        {{#search_results}}
-        <div class="search-result">
-            <span class="pill">{{type_label}}</span> <a href="{{url}}">{{title}}</a>
-            <p class="search-excerpt">{{excerpt}}</p>
-        </div>
-        {{/search_results}}
+        {{#backend_unavailable}}<p class="search-unavailable">{{lbl_unavailable}}</p>{{/backend_unavailable}}
+        {{^backend_unavailable}}
+            {{#has_results}}<p class="search-count">{{result_count}}</p>{{/has_results}}
+            {{^has_results}}<p class="search-empty">{{lbl_no_results}}</p>{{/has_results}}
+            {{#search_hits}}
+            <div class="search-result">
+                {{#display}}<span class="search-url">{{text}}</span>{{/display}}
+                <div class="search-title">{{#badge}}<span class="pill">{{text}}</span>{{/badge}}<a href="{{url}}" rel="{{rel}}">{{title}}</a></div>
+                {{#snippet}}<span class="search-snippet">{{text}}</span>{{/snippet}}
+                <ul class="search-files">{{#files}}<li>{{path}}<span class="file-size">{{size}}</span></li>{{/files}}{{#more_files}}<li class="file-more">+ {{count}} {{lbl_more_files}}</li>{{/more_files}}</ul>
+                {{#meta}}<span class="search-meta">{{text}}</span>{{/meta}}
+                <div class="search-links">{{#links}}<a href="{{url}}" rel="nofollow">{{label}}</a>{{/links}}</div>
+            </div>
+            {{/search_hits}}
+        {{/backend_unavailable}}
+        <nav class="search-footer">
+            {{#has_prev}}<a href="{{prev_url}}" rel="nofollow">&larr; {{lbl_prev}}</a>{{/has_prev}}
+            {{#has_next}}<a href="{{next_url}}" rel="nofollow">{{lbl_next}} &rarr;</a>{{/has_next}}
+            {{#has_more_url}}<a href="{{more_url}}" rel="nofollow">{{lbl_more}}</a>{{/has_more_url}}
+        </nav>
     {{/searched}}
 </div>
