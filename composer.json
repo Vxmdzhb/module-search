@@ -1,6 +1,7 @@
 {
     "name": "astrx/module-search",
     "description": "Site-wide full-text search with its index crawler",
+    "license": "LicenseRef-DoWhatever",
     "type": "astrx-module",
     "keywords": [
         "astrx",
