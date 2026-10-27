@@ -126,12 +126,11 @@ final class SearchSources
         $out = [];
         foreach ($rows as $row) {
             $resolved = $this->resolvePageUrlId($row);
-            $title    = $this->s($row['title'] ?? null);
             $out[]    = [
                 'doc_type' => self::TYPE_PAGES,
                 'ref_id'   => $this->i($row['id'] ?? null),
-                'title'    => $title !== '' ? $title : $resolved,
-                'body'     => $this->s($row['description'] ?? null),
+                'title'    => $this->pageText($row, 'title', $resolved),
+                'body'     => $this->pageText($row, 'description', ''),
                 'url'      => $this->urlGen->toPage($resolved),
                 'doc_time' => 0,
             ];
@@ -374,12 +373,11 @@ final class SearchSources
         $out = [];
         foreach ($rows as $row) {
             $resolved = $this->resolvePageUrlId($row);
-            $title    = $this->s($row['title'] ?? null);
             $out[]    = [
                 'type'    => self::TYPE_PAGES,
                 'ref_id'  => $this->i($row['id'] ?? null),
-                'title'   => $title !== '' ? $title : $resolved,
-                'excerpt' => $this->excerpt($this->s($row['description'] ?? null)),
+                'title'   => $this->pageText($row, 'title', $resolved),
+                'excerpt' => $this->excerpt($this->pageText($row, 'description', '')),
                 'url'     => $this->urlGen->toPage($resolved),
                 'time'    => 0,
             ];
@@ -474,7 +472,11 @@ final class SearchSources
     /** Build a plain-text, width-limited excerpt from possibly-HTML text. */
     public function excerpt(string $text): string
     {
-        return mb_strimwidth(strip_tags($text), 0, self::EXCERPT_WIDTH, self::EXCERPT_MARKER);
+        // A line or block break becomes a space first, so stripping the tags
+        // doesn't glue "only<br>Based" into "onlyBased".
+        $spaced = preg_replace('#<(?:br|/p|/div|/li|/h[1-6]|/blockquote|/pre)\b[^>]*>#i', ' ', $text);
+        $plain  = preg_replace('/\s+/u', ' ', strip_tags(is_string($spaced) ? $spaced : $text));
+        return mb_strimwidth(trim(is_string($plain) ? $plain : ''), 0, self::EXCERPT_WIDTH, self::EXCERPT_MARKER);
     }
 
     /** URL of the main page (news lives there, anchored per item). */
@@ -501,6 +503,28 @@ final class SearchSources
         return ($this->i($row['i18n'] ?? null) === 1)
             ? $this->t->t($urlId, fallback: $urlId)
             : $urlId;
+    }
+
+    /**
+     * A page's title or description: page_meta's when set, else the catalog's
+     * (`<url_id>.title`, as the page itself shows it), else $fallback. A
+     * module's pages leave page_meta empty and keep their words in catalogs.
+     *
+     * @param array<string,mixed> $row
+     */
+    private function pageText(array $row, string $field, string $fallback): string
+    {
+        $stored = $this->s($row[$field] ?? null);
+        if ($stored !== '') {
+            return $stored;
+        }
+        $urlId = $this->s($row['url_id'] ?? null);
+        if ($urlId === '' || $this->i($row['i18n'] ?? null) !== 1) {
+            return $fallback;
+        }
+        $key = $urlId . '.' . $field;
+        $text = $this->t->t($key, fallback: $key);
+        return $text !== $key ? $text : $fallback;
     }
 
     /** Cast mixed→string safely for PHPStan level 10. */
